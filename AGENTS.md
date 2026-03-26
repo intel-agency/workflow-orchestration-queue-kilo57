@@ -7,9 +7,14 @@ scope: repository
 <instructions>
   <purpose>
     <summary>
-      GitHub Actions-based AI orchestration system. On GitHub events (issues, PR comments, reviews),
+      workflow-orchestration-queue (OS-APOW) is a headless agentic orchestration platform
+      that transforms GitHub Issues into automated execution orders. It uses a 4-pillar
+      architecture (Ear/State/Brain/Hands) to detect work orders, claim tasks, and execute
+      agentic workflows in isolated DevContainers.
+      
+      This is also a GitHub Actions-based AI orchestration system. On GitHub events,
       the `orchestrator-agent` workflow assembles a structured prompt, spins up a devcontainer,
-      and runs `opencode --agent Orchestrator` to delegate work to specialist sub-agents in `.opencode/agents/`.
+      and runs `opencode --agent Orchestrator` to delegate work to specialist sub-agents.
     </summary>
   </purpose>
 
@@ -54,10 +59,15 @@ scope: repository
   </template_usage>
 
   <tech_stack>
+    <item>Python 3.12+ — primary language for Orchestrator, API, and system logic</item>
+    <item>FastAPI + Uvicorn — high-performance async web framework for webhook receiver</item>
+    <item>Pydantic 2.x — data validation, settings management, schema definitions</item>
+    <item>HTTPX — async HTTP client for GitHub REST API calls</item>
+    <item>uv — Rust-based Python package manager (primary)</item>
+    <item>Docker/DevContainers — worker isolation and reproducible environments</item>
     <item>opencode CLI — agent runtime (`opencode --model zai-coding-plan/glm-5 --agent Orchestrator`)</item>
     <item>ZhipuAI GLM models via `ZHIPU_API_KEY`</item>
     <item>GitHub Actions + devcontainers/ci — workflow trigger, runner, reproducible container</item>
-    <item>.NET SDK 10 + Aspire + Avalonia templates, Bun, uv (all in devcontainer)</item>
     <item>MCP servers: `@modelcontextprotocol/server-sequential-thinking`, `@modelcontextprotocol/server-memory`</item>
   </tech_stack>
 
@@ -127,13 +137,16 @@ scope: repository
   </environment_setup>
 
   <testing>
-    <guidance>Tests are shell scripts in `test/`. Run directly with `bash`.</guidance>
+    <guidance>Tests are shell scripts in `test/` and Python tests in `tests/`.</guidance>
     <commands>
-      <command>All tests: `bash test/test-devcontainer-build.sh && bash test/test-devcontainer-tools.sh && bash test/test-prompt-assembly.sh`</command>
-      <command>Prompt changes: `bash test/test-prompt-assembly.sh`</command>
-      <command>Dockerfile changes: `bash test/test-devcontainer-tools.sh`</command>
+      <command>Python tests: `uv run pytest`</command>
+      <command>Python tests with coverage: `uv run pytest --cov=src --cov-report=term-missing`</command>
+      <command>Lint: `uv run ruff check src/`</command>
+      <command>Format check: `uv run ruff format --check src/`</command>
+      <command>Type check: `uv run mypy src/`</command>
+      <command>Shell tests: `bash test/test-devcontainer-build.sh && bash test/test-devcontainer-tools.sh && bash test/test-prompt-assembly.sh`</command>
     </commands>
-    <guidance>Add new fixture payloads to `test/fixtures/` when testing new event types.</guidance>
+    <guidance>Add new test fixtures to `tests/` for Python tests or `test/fixtures/` for webhook payloads.</guidance>
   </testing>
 
   <coding_conventions>
